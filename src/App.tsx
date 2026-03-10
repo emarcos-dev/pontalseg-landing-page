@@ -71,15 +71,7 @@ const featureHighlights = [
   },
 ];
 
-const partnerBrands = [
-  {name: 'Intelbras', src: 'https://logo.clearbit.com/intelbras.com.br'},
-  {name: 'Hikvision', src: 'https://logo.clearbit.com/hikvision.com'},
-  {name: 'Dahua', src: 'https://logo.clearbit.com/dahuasecurity.com'},
-  {name: 'HDL', src: 'https://logo.clearbit.com/hdl.com.br'},
-  {name: 'Rossi', src: 'https://logo.clearbit.com/rossiportoes.com.br'},
-  {name: 'Garen', src: 'https://logo.clearbit.com/garen.com.br'},
-  {name: 'PPA', src: 'https://logo.clearbit.com/ppa.com.br'},
-];
+const partnerBrands = ['Intelbras', 'Hikvision', 'Dahua', 'HDL', 'Rossi', 'Garen', 'PPA'];
 
 const metrics = [
   {value: '1000+', label: 'Clientes atendidos'},
@@ -158,34 +150,6 @@ export default function App() {
       document.body.style.overflow = '';
     };
   }, [menuOpen]);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const sections = Array.from(document.querySelectorAll<HTMLElement>('.reveal-section'));
-    if (!sections.length) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          entry.target.classList.toggle('is-visible', entry.isIntersecting);
-        });
-      },
-      {
-        threshold: 0.18,
-        rootMargin: '-8% 0px -8% 0px',
-      },
-    );
-
-    sections.forEach((section) => observer.observe(section));
-
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const onResize = () => {
@@ -325,7 +289,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section community-section section-band section-band-white reveal-section" id="servicos">
+        <section className="section community-section section-band section-band-white" id="servicos">
           <div className="container">
             <div className="section-heading centered">
               <h2>Gerencie a segurança do imóvel em um sistema mais simples</h2>
@@ -345,7 +309,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section feature-section section-band section-band-mint reveal-section" id="sobre">
+        <section className="section feature-section section-band section-band-mint" id="sobre">
           <div className="container feature-grid">
             <div className="feature-visual">
               <div className="feature-visual-card" style={createParallaxStyle(0.02)}>
@@ -386,7 +350,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section metrics-section section-band section-band-slate reveal-section" id="diferenciais">
+        <section className="section metrics-section section-band section-band-slate" id="diferenciais">
           <div className="container metrics-grid">
             <div className="metrics-copy">
               <p className="section-kicker">Diferenciais</p>
@@ -407,7 +371,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section highlights-section section-band section-band-white reveal-section">
+        <section className="section highlights-section section-band section-band-white">
           <div className="container">
             <div className="highlight-grid">
               {featureHighlights.map(({icon: Icon, title, description}) => (
@@ -423,7 +387,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section coverage-section section-band section-band-soft reveal-section">
+        <section className="section coverage-section section-band section-band-soft">
           <div className="container coverage-grid">
             <div>
               <p className="section-kicker">Região de atendimento</p>
@@ -447,7 +411,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section clients-section section-band section-band-cool reveal-section" id="parceiros">
+        <section className="section clients-section section-band section-band-cool" id="parceiros">
           <div className="container">
             <div className="section-heading centered">
               <h2>Nossos parceiros de tecnologia</h2>
@@ -455,21 +419,15 @@ export default function App() {
             </div>
             <div className="brand-row" aria-label="Marcas parceiras">
               {partnerBrands.map((brand) => (
-                <span className="brand-chip" key={brand.name}>
-                  <img
-                    className="brand-chip-logo"
-                    src={brand.src}
-                    alt={`Logo ${brand.name}`}
-                    loading="lazy"
-                  />
-                  <span className="brand-chip-name">{brand.name}</span>
+                <span className="brand-chip" key={brand}>
+                  {brand}
                 </span>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="section cta-section section-band section-band-mint reveal-section" id="contato">
+        <section className="section cta-section section-band section-band-mint" id="contato">
           <div className="container cta-card">
             <div>
               <p className="section-kicker">Contato</p>
