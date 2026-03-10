@@ -4,6 +4,7 @@ import {
   Bell,
   CheckCircle2,
   DoorOpen,
+  Fence,
   MapPinned,
   Menu,
   Phone,
@@ -12,15 +13,16 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import logo from '../img/logo.jpeg';
+import logo from '../img/logo_red.png';
 
 const WHATSAPP_URL = 'https://wa.me/552498340551';
 const PHONE_URL = 'tel:+552498340551';
 
 const navItems = [
-  {href: '#sobre', label: 'Sobre'},
   {href: '#servicos', label: 'Serviços'},
+  {href: '#sobre', label: 'Sobre'},
   {href: '#diferenciais', label: 'Diferenciais'},
+  {href: '#parceiros', label: 'Parceiros'},
   {href: '#contato', label: 'Contato'},
 ];
 
@@ -43,6 +45,12 @@ const serviceCards = [
     description:
       'Controle de entrada com interfones, motores, acionamento remoto e manutenção preventiva.',
   },
+  {
+    icon: Fence,
+    title: 'Serralharia',
+    description:
+      'Fabricação e instalação de grades e portões com execução cuidadosa e acabamento alinhado ao projeto.',
+  },
 ];
 
 const featureHighlights = [
@@ -63,7 +71,15 @@ const featureHighlights = [
   },
 ];
 
-const partnerBrands = ['Intelbras', 'Hikvision', 'Dahua', 'HDL', 'Rossi', 'Garen', 'PPA'];
+const partnerBrands = [
+  {name: 'Intelbras', src: 'https://logo.clearbit.com/intelbras.com.br'},
+  {name: 'Hikvision', src: 'https://logo.clearbit.com/hikvision.com'},
+  {name: 'Dahua', src: 'https://logo.clearbit.com/dahuasecurity.com'},
+  {name: 'HDL', src: 'https://logo.clearbit.com/hdl.com.br'},
+  {name: 'Rossi', src: 'https://logo.clearbit.com/rossiportoes.com.br'},
+  {name: 'Garen', src: 'https://logo.clearbit.com/garen.com.br'},
+  {name: 'PPA', src: 'https://logo.clearbit.com/ppa.com.br'},
+];
 
 const metrics = [
   {value: '1000+', label: 'Clientes atendidos'},
@@ -85,9 +101,50 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerCompact, setHeaderCompact] = useState(false);
   const [logoVisible, setLogoVisible] = useState(true);
+  const [activeSection, setActiveSection] = useState('#servicos');
+  const [scrollY, setScrollY] = useState(0);
+  const [compactMotion, setCompactMotion] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
+  );
 
   useEffect(() => {
-    const onScroll = () => setHeaderCompact(window.scrollY > 12);
+    const onScroll = () => {
+      setHeaderCompact(window.scrollY > 12);
+      setScrollY(window.scrollY);
+
+      const header = document.querySelector<HTMLElement>('.site-header');
+      const headerOffset = header ? header.offsetHeight + 28 : 112;
+      const currentScroll = window.scrollY + headerOffset;
+
+      const sections = navItems
+        .map((item) => {
+          const element = document.querySelector<HTMLElement>(item.href);
+          return element
+            ? {
+                href: item.href,
+                top: element.offsetTop,
+              }
+            : null;
+        })
+        .filter((section): section is {href: string; top: number} => Boolean(section))
+        .sort((a, b) => a.top - b.top);
+
+      if (!sections.length) {
+        return;
+      }
+
+      let nextActive = sections[0].href;
+
+      for (const section of sections) {
+        if (currentScroll >= section.top) {
+          nextActive = section.href;
+        } else {
+          break;
+        }
+      }
+
+      setActiveSection(nextActive);
+    };
 
     onScroll();
     window.addEventListener('scroll', onScroll, {passive: true});
@@ -102,7 +159,49 @@ export default function App() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('.reveal-section'));
+    if (!sections.length) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.18,
+        rootMargin: '-8% 0px -8% 0px',
+      },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setCompactMotion(window.innerWidth <= 768);
+    };
+
+    onResize();
+    window.addEventListener('resize', onResize);
+
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const closeMenu = () => setMenuOpen(false);
+  const createParallaxStyle = (speed: number) => ({
+    transform: compactMotion ? 'none' : `translate3d(0, ${Math.round(scrollY * speed)}px, 0)`,
+  });
 
   return (
     <div className="page-shell">
@@ -134,7 +233,10 @@ export default function App() {
             <ul className="nav-list">
               {navItems.map((item) => (
                 <li key={item.href}>
-                  <a href={item.href} onClick={closeMenu}>
+                  <a
+                    className={activeSection === item.href ? 'is-active' : ''}
+                    href={item.href}
+                    onClick={closeMenu}>
                     {item.label}
                   </a>
                 </li>
@@ -184,7 +286,7 @@ export default function App() {
                 </div>
 
                 <div className="hero-visual" aria-hidden="true">
-                  <div className="hero-screen">
+                  <div className="hero-screen" style={createParallaxStyle(-0.05)}>
                     <div className="hero-screen-top" />
                     <div className="hero-screen-body">
                       <div className="hero-screen-sidebar">
@@ -204,47 +306,26 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  <div className="hero-floating hero-floating-top">
+                  <div className="hero-floating hero-floating-top" style={createParallaxStyle(-0.08)}>
                     <Shield size={18} />
                     <span>Sistema protegido</span>
                   </div>
-                  <div className="hero-floating hero-floating-side">
+                  <div className="hero-floating hero-floating-side" style={createParallaxStyle(0.03)}>
                     <Video size={18} />
                     <span>Monitoramento ativo</span>
                   </div>
-                  <div className="hero-operator">
+                  <div className="hero-operator" style={createParallaxStyle(0.06)}>
                     <div className="hero-operator-head" />
                     <div className="hero-operator-body" />
                     <div className="hero-operator-tablet" />
                   </div>
                 </div>
               </div>
-              <div className="hero-dots" aria-hidden="true">
-                <span className="is-active" />
-                <span />
-                <span />
-              </div>
             </section>
           </div>
         </section>
 
-        <section className="section clients-section">
-          <div className="container">
-            <div className="section-heading centered">
-              <h2>Nossos parceiros de tecnologia</h2>
-              <p>Trabalhamos com fabricantes consolidados para manter o sistema estável.</p>
-            </div>
-            <div className="brand-row" aria-label="Marcas parceiras">
-              {partnerBrands.map((brand) => (
-                <span className="brand-chip" key={brand}>
-                  {brand}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section community-section" id="servicos">
+        <section className="section community-section section-band section-band-white reveal-section" id="servicos">
           <div className="container">
             <div className="section-heading centered">
               <h2>Gerencie a segurança do imóvel em um sistema mais simples</h2>
@@ -264,10 +345,10 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section feature-section" id="sobre">
+        <section className="section feature-section section-band section-band-mint reveal-section" id="sobre">
           <div className="container feature-grid">
             <div className="feature-visual">
-              <div className="feature-visual-card">
+              <div className="feature-visual-card" style={createParallaxStyle(0.02)}>
                 <div className="feature-bars">
                   <span />
                   <span />
@@ -305,7 +386,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section metrics-section" id="diferenciais">
+        <section className="section metrics-section section-band section-band-slate reveal-section" id="diferenciais">
           <div className="container metrics-grid">
             <div className="metrics-copy">
               <p className="section-kicker">Diferenciais</p>
@@ -315,7 +396,7 @@ export default function App() {
                 reduzir falhas, pontos cegos e improvisos na operação diária.
               </p>
             </div>
-            <div className="metrics-list">
+            <div className="metrics-list" style={createParallaxStyle(0.015)}>
               {metrics.map((metric) => (
                 <article className="metric-card" key={metric.label}>
                   <strong>{metric.value}</strong>
@@ -326,7 +407,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section highlights-section">
+        <section className="section highlights-section section-band section-band-white reveal-section">
           <div className="container">
             <div className="highlight-grid">
               {featureHighlights.map(({icon: Icon, title, description}) => (
@@ -342,7 +423,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section coverage-section">
+        <section className="section coverage-section section-band section-band-soft reveal-section">
           <div className="container coverage-grid">
             <div>
               <p className="section-kicker">Região de atendimento</p>
@@ -356,7 +437,7 @@ export default function App() {
                 ))}
               </ul>
             </div>
-            <aside className="coverage-card">
+            <aside className="coverage-card" style={createParallaxStyle(0.018)}>
               <span className="coverage-badge">Cobertura ativa</span>
               <p>
                 Equipe preparada para implantações, ajustes e manutenção em rota regional,
@@ -366,8 +447,30 @@ export default function App() {
           </div>
         </section>
 
-        <section className="section cta-section">
-          <div className="container cta-card" id="contato">
+        <section className="section clients-section section-band section-band-cool reveal-section" id="parceiros">
+          <div className="container">
+            <div className="section-heading centered">
+              <h2>Nossos parceiros de tecnologia</h2>
+              <p>Trabalhamos com fabricantes consolidados para manter o sistema estável.</p>
+            </div>
+            <div className="brand-row" aria-label="Marcas parceiras">
+              {partnerBrands.map((brand) => (
+                <span className="brand-chip" key={brand.name}>
+                  <img
+                    className="brand-chip-logo"
+                    src={brand.src}
+                    alt={`Logo ${brand.name}`}
+                    loading="lazy"
+                  />
+                  <span className="brand-chip-name">{brand.name}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section cta-section section-band section-band-mint reveal-section" id="contato">
+          <div className="container cta-card">
             <div>
               <p className="section-kicker">Contato</p>
               <h2>Solicite uma avaliação técnica para definir a solução adequada.</h2>
@@ -392,7 +495,17 @@ export default function App() {
         <div className="container footer-shell">
           <div className="footer-grid">
             <div className="footer-brand">
-              <h3>PontalSeg</h3>
+              <div className="footer-brand-lockup">
+                {logoVisible ? (
+                  <img
+                    className="footer-brand-logo"
+                    src={logo}
+                    alt="Logo da PontalSeg"
+                    onError={() => setLogoVisible(false)}
+                  />
+                ) : null}
+                <h3>PontalSeg</h3>
+              </div>
               <p>Segurança eletrônica para proteger residência, empresa e condomínio.</p>
               <p className="footer-note">
                 Soluções em monitoramento, alarmes, controle de acesso e automação com atendimento regional.
@@ -400,10 +513,16 @@ export default function App() {
             </div>
             <div className="footer-column">
               <h3>Navegação</h3>
-              <a href="#sobre">Sobre</a>
-              <a href="#servicos">Serviços</a>
-              <a href="#diferenciais">Diferenciais</a>
-              <a href="#contato">Contato</a>
+              {navItems.map((item) => (
+                <a
+                  className={activeSection === item.href ? 'is-active' : ''}
+                  href={item.href}
+                  key={item.href}>
+                  {item.label}
+                </a>
+              ))}
+              <a href="/termos-de-servico.html">Termos de Serviço</a>
+              <a href="/politica-de-privacidade.html">Política de Privacidade</a>
             </div>
             <div className="footer-column">
               <h3>Contato</h3>
