@@ -7,16 +7,19 @@ import {
   Fence,
   MapPinned,
   Menu,
+  Moon,
   Phone,
   Shield,
+  Sun,
   Users,
   Video,
   X,
 } from 'lucide-react';
 import logo from '../img/logo_red.png';
 
-const WHATSAPP_URL = 'https://wa.me/552498340551';
-const PHONE_URL = 'tel:+552498340551';
+const WHATSAPP_URL = 'https://wa.me/5524998340551';
+const PHONE_URL = 'tel:+5524998340551';
+const THEME_STORAGE_KEY = 'pontalseg-theme';
 
 const navItems = [
   {href: '#servicos', label: 'Serviços'},
@@ -89,6 +92,8 @@ const cities = [
   'Volta Redonda e região',
 ];
 
+type ThemeMode = 'system' | 'light' | 'dark';
+
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerCompact, setHeaderCompact] = useState(false);
@@ -98,6 +103,16 @@ export default function App() {
   const [compactMotion, setCompactMotion] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
   );
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    if (typeof window === 'undefined') {
+      return 'system';
+    }
+
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
+      ? savedTheme
+      : 'system';
+  });
 
   useEffect(() => {
     const onScroll = () => {
@@ -152,6 +167,28 @@ export default function App() {
   }, [menuOpen]);
 
   useEffect(() => {
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      const isDark = themeMode === 'dark' || (themeMode === 'system' && mediaQuery.matches);
+      root.classList.toggle('theme-dark', isDark);
+      root.dataset.theme = themeMode;
+      root.style.colorScheme = isDark ? 'dark' : 'light';
+    };
+
+    applyTheme();
+
+    if (themeMode === 'system') {
+      const handleChange = () => applyTheme();
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    return undefined;
+  }, [themeMode]);
+
+  useEffect(() => {
     const onResize = () => {
       setCompactMotion(window.innerWidth <= 768);
     };
@@ -163,6 +200,16 @@ export default function App() {
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
+  const isDarkTheme =
+    themeMode === 'dark' ||
+    (themeMode === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const toggleTheme = () => {
+    const nextTheme: ThemeMode = isDarkTheme ? 'light' : 'dark';
+    setThemeMode(nextTheme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  };
   const createParallaxStyle = (speed: number) => ({
     transform: compactMotion ? 'none' : `translate3d(0, ${Math.round(scrollY * speed)}px, 0)`,
   });
@@ -206,6 +253,14 @@ export default function App() {
                 </li>
               ))}
             </ul>
+            <button
+              className="theme-toggle"
+              type="button"
+              aria-label={isDarkTheme ? 'Ativar modo claro' : 'Ativar modo escuro'}
+              title={isDarkTheme ? 'Ativar modo claro' : 'Ativar modo escuro'}
+              onClick={toggleTheme}>
+              {isDarkTheme ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <a
               className="btn btn-primary nav-cta"
               href={WHATSAPP_URL}
@@ -442,7 +497,7 @@ export default function App() {
                 Falar no WhatsApp
               </a>
               <a className="btn btn-secondary" href={PHONE_URL}>
-                (24) 98340-551
+                (24) 99834-0551
               </a>
             </div>
           </div>
@@ -485,9 +540,9 @@ export default function App() {
             <div className="footer-column">
               <h3>Contato</h3>
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                WhatsApp: (24) 98340-551
+                WhatsApp: (24) 99834-0551
               </a>
-              <a href={PHONE_URL}>Telefone: (24) 98340-551</a>
+              <a href={PHONE_URL}>Telefone: (24) 99834-0551</a>
               <a href="mailto:contato@pontalseg.com.br">contato@pontalseg.com.br</a>
             </div>
             <div className="footer-column">

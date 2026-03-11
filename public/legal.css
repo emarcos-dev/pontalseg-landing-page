@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #23313a;
   background: #f4f7f4;
@@ -205,6 +206,55 @@ img {
   justify-content: space-between;
   gap: 1rem;
   color: var(--muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page-bg: #0f1517;
+    --surface: #162024;
+    --surface-soft: #142024;
+    --line: #26343a;
+    --text: #e6eef0;
+    --muted: #a3b4bb;
+    --heading: #f3f7f8;
+    --brand-soft: #24381b;
+    --shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top, rgba(139, 197, 63, 0.12), transparent 24%),
+      linear-gradient(180deg, rgba(95, 127, 138, 0.08), rgba(95, 127, 138, 0)),
+      var(--page-bg);
+  }
+
+  .legal-header {
+    background: rgba(15, 21, 23, 0.9);
+  }
+
+  .legal-hero-card {
+    background:
+      linear-gradient(135deg, rgba(139, 197, 63, 0.12), rgba(255, 255, 255, 0) 28%),
+      linear-gradient(225deg, rgba(95, 127, 138, 0.14), rgba(255, 255, 255, 0) 32%),
+      #121c1f;
+    border-color: rgba(163, 180, 187, 0.12);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+  }
+
+  .legal-card {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .legal-highlight {
+    color: var(--text);
+    background: var(--brand-soft);
+  }
+
+  .legal-footer {
+    background: #10181b;
+  }
 }
 
 @media (max-width: 720px) {
